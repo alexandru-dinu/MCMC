@@ -1,32 +1,32 @@
 """
-Annealed Importance Sampling (AIS
+Annealed Importance Sampling (AIS)
 =================================
 Neal, Radford M. "Annealed importance sampling." Statistics and computing 11.2 (2001): 125-139.
 """
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats as st
-import matplotlib.pyplot as plt
 
 
 def f_0(x):
     """
     Target distribution: \propto N(-5, 2)
     """
-    return np.exp(-(x+5)**2/2/2)
+    return np.exp(-((x + 5) ** 2) / 2 / 2)
 
 
 def f_n(x):
     """
     Proposal distribution: \propto N(0, 1)
     """
-    return np.exp(-x**2/2)
+    return np.exp(-(x ** 2) / 2)
 
 
 def f_j(x, beta):
     """
     Intermediate distribution: interpolation between f_0 and f_n
     """
-    return f_0(x)**beta * f_n(x)**(1-beta)
+    return f_0(x) ** beta * f_n(x) ** (1 - beta)
 
 
 def T(x, f, n_steps=10):
@@ -79,13 +79,13 @@ for t in range(n_samples):
 
         # Compute weight in log space:
         # w *= f_{n-1}(x_{n-1}) / f_n(x_{n-1})
-        w += np.log(f_j(x, betas[n])) - np.log(f_j(x, betas[n-1]))
+        w += np.log(f_j(x, betas[n])) - np.log(f_j(x, betas[n - 1]))
 
     samples[t] = x
     weights[t] = np.exp(w)
 
 
 # Compute expectation
-a = 1/np.sum(weights) * np.sum(weights * samples)
+a = 1 / np.sum(weights) * np.sum(weights * samples)
 # Print: should be close to -5, the mean of p_0
-print('Expectation of p_0: {:.4f}'.format(a))
+print("Expectation of p_0: {:.4f}".format(a))

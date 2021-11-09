@@ -1,6 +1,5 @@
 import numpy as np
 
-
 """
 Bayes Net
 ---------
@@ -14,16 +13,15 @@ p(S,R,J,T) = p(S)p(R)p(J|R)p(T|S,R)
 p_r = np.array([0.8, 0.2])
 p_s = np.array([0.9, 0.1])
 
-p_j_given_r = np.array([
-    [0.8, 0.2],  # p(j|r=0)
-    [0, 1]  # p(j|r=1)
-])
+p_j_given_r = np.array([[0.8, 0.2], [0, 1]])  # p(j|r=0)  # p(j|r=1)
 
 
-p_t_given_r_s = np.array([
-    [[1, 0], [0.1, 0.9]],  # p(t|r=0,s)
-    [[0, 1], [0, 1]],  # p(t|r=1,s)
-])
+p_t_given_r_s = np.array(
+    [
+        [[1, 0], [0.1, 0.9]],  # p(t|r=0,s)
+        [[0, 1], [0, 1]],  # p(t|r=1,s)
+    ]
+)
 
 supp = [0, 1]  # Support of all dists.
 
@@ -56,8 +54,8 @@ while True:
 
     i += 1
 
-print('======================================================================')
-print('Total samples needed to get {} valid samples: {}'.format(n_sample, i))
+print("======================================================================")
+print("Total samples needed to get {} valid samples: {}".format(n_sample, i))
 
 
 """
@@ -77,18 +75,25 @@ for it in range(gibbs_iters):
 
     if i == 0:  # r
         # Sample from full conditional of r: p(r)p(j|r)p(t|r,s)/Z
-        p_1 = p_r[r]*p_j_given_r[r, j]*p_t_given_r_s[r, s, t]
-        Z = p_1 + p_r[1-r]*p_j_given_r[1-r, j]*p_t_given_r_s[1-r, s, t]
+        p_1 = p_r[r] * p_j_given_r[r, j] * p_t_given_r_s[r, s, t]
+        Z = p_1 + p_r[1 - r] * p_j_given_r[1 - r, j] * p_t_given_r_s[1 - r, s, t]
         p_1 = p_1 / Z
-        p_0 = 1-p_1
+        p_0 = 1 - p_1
 
         p = [p_0, p_1] if r == 1 else [p_1, p_0]
 
         r = np.random.choice(supp, p=p)
     elif i == 1:  # s
         # Sample from: p(s)p(t|r,s)/Z
-        p_1 = p_s[s]*p_t_given_r_s[r, s, t]/(p_s[s]*p_t_given_r_s[r, s, t] + p_s[1-s]*p_t_given_r_s[r, 1-s, t])
-        p_0 = 1-p_1
+        p_1 = (
+            p_s[s]
+            * p_t_given_r_s[r, s, t]
+            / (
+                p_s[s] * p_t_given_r_s[r, s, t]
+                + p_s[1 - s] * p_t_given_r_s[r, 1 - s, t]
+            )
+        )
+        p_0 = 1 - p_1
 
         p = [p_0, p_1] if s == 1 else [p_1, p_0]
 
@@ -101,20 +106,24 @@ for it in range(gibbs_iters):
         if it % thinning == 0:
             samples_gibbs.append([r, s, j, t])
 
-print('======================================================================')
-print('Gibbs sampling with {} iterations, burnin: {} and thinning: {}'.format(gibbs_iters, burnin, thinning))
-print('Total samples from Gibbs sampling: {}'.format(len(samples_gibbs)))
+print("======================================================================")
+print(
+    "Gibbs sampling with {} iterations, burnin: {} and thinning: {}".format(
+        gibbs_iters, burnin, thinning
+    )
+)
+print("Total samples from Gibbs sampling: {}".format(len(samples_gibbs)))
 
-print('======================================================================')
+print("======================================================================")
 samples = np.array(samples)
 samples_gibbs = np.array(samples_gibbs)
 
 # Look for samples with s = 1
 # Ancestral
 p_s1_t1 = np.mean(samples[:, 1] == 1)
-print('Ancestral sampling: p(s=1|t=1) = {:.4f}'.format(p_s1_t1))
+print("Ancestral sampling: p(s=1|t=1) = {:.4f}".format(p_s1_t1))
 
 # Gibbs
 p_s1_t1_gibbs = np.mean(samples_gibbs[:, 1] == 1)
-print('Gibbs sampling: p(s=1|t=1) = {:.4f}'.format(p_s1_t1_gibbs))
-print('======================================================================')
+print("Gibbs sampling: p(s=1|t=1) = {:.4f}".format(p_s1_t1_gibbs))
+print("======================================================================")

@@ -26,9 +26,9 @@ def gibbs_sampling(mus, sigmas, iter=10000):
     return samples
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     mus = np.array([5, 5])
-    sigmas = np.array([[1, .9], [.9, 1]])
+    sigmas = np.array([[1, 0.9], [0.9, 1]])
 
     samples = gibbs_sampling(mus, sigmas)
     sns.jointplot(samples[:, 0], samples[:, 1])
